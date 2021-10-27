@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import deap
 import matplotlib.pyplot as plt
 from deap import base
 from deap import creator
@@ -24,21 +23,12 @@ def penalizar(individual):
     suma = sum(individual)
 
     if suma > 10:
-        return "penalizado"
+        return "fue penalizado"
     else:
-        return "no penalizado"
+        return "no fue penalizado"
 
 def obtenerResultados(b, inversion):
-    
-    print("Beneficio: ", b)
-    print("Inversion: ", inversion)
-
-    cantidad = beneficio[b][inversion]
-
-    print("Cantidad: ", cantidad)
-    print(" ")
-
-    return cantidad
+    return beneficio[b][inversion]
 
 def aptitudIndividuo(individual):
     c1, c2, c3, c4 = [individual[i] for i in (0, 1, 2, 3)]
@@ -50,9 +40,6 @@ def aptitudIndividuo(individual):
     
     dividendo = c1Resultado + c2Resultado + c3Resultado + c4Resultado
     v = abs(dividendo - 10)
-
-    print("Dividendo: ", dividendo)
-    print("v:", v)
     
     validaPenalizacion = penalizacion(individual)
     aptitud = dividendo / (500 * v + 1)
@@ -98,7 +85,8 @@ def programa():
     print("Poblacion inicial: ")
     
     for elemento in poblacion:
-        print("El individuo ", elemento, " fue ", penalizar(elemento))
+        print("El individuo ", elemento, penalizar(elemento))
+    print(" ")
 
     stats.register('avg', np.mean)
     stats.register('std', np.std)
@@ -112,4 +100,4 @@ def programa():
 
 if __name__ == "__main__":
     poblacion, stats, hof = programa()
-    print("El mejor individuo de acuerdo a la funcion es ", hof, " con un costo de ", costoIndividuo(hof[0]))
+    print("El mejor individuo fue ", hof, " y tiene un costo de ", costoIndividuo(hof[0]))
