@@ -56,9 +56,21 @@ def aptitudIndividuo(individual):
     
     validaPenalizacion = penalizacion(individual)
     aptitud = dividendo / (500 * v + 1)
-    #aptitud = aptitud if not validaPenalizacion else 0
+    aptitud = aptitud if not validaPenalizacion else 0
 
     return aptitud,
+
+def costoIndividuo(individual):
+    c1, c2, c3, c4 = [individual[i] for i in (0, 1, 2, 3)]
+
+    c1Resultado = obtenerResultados(0, c1)
+    c2Resultado = obtenerResultados(1, c2)
+    c3Resultado = obtenerResultados(2, c3)
+    c4Resultado = obtenerResultados(3, c4)
+    
+    costo = c1Resultado + c2Resultado + c3Resultado + c4Resultado
+
+    return costo
 
 creator.create('FitnessMax', base.Fitness, weights=(1.0,))
 creator.create('individual', list, fitness=creator.FitnessMax)
@@ -70,8 +82,8 @@ toolbox.register('population', tools.initRepeat, list, toolbox.individual)
 
 toolbox.register('evaluate', aptitudIndividuo)
 toolbox.register('mate', tools.cxTwoPoint)
-toolbox.register('mutate', tools.mutShuffleIndexes, indpb=2.00)
-toolbox.register('select', tools.selRoulette)
+toolbox.register('mutate', tools.mutShuffleIndexes, indpb=0.01)
+toolbox.register('select', tools.selTournament, tournsize=2)
 
 def programa():
     numeroPoblacion      = int(input("Numero de individuos para la poblacion: "))
@@ -100,4 +112,4 @@ def programa():
 
 if __name__ == "__main__":
     poblacion, stats, hof = programa()
-    print("El mejor individuo de acuerdo a la funcion es ", hof, " con un costo de ", aptitudIndividuo(hof[0]))
+    print("El mejor individuo de acuerdo a la funcion es ", hof, " con un costo de ", costoIndividuo(hof[0]))
