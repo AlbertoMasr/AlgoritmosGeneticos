@@ -5,6 +5,7 @@ from deap import base
 from deap import creator
 from deap import tools
 from deap import algorithms
+from numpy.lib.function_base import append
 
 beneficio = [[0, 0.28, 0.45, 0.65, 0.78, 0.90, 1.02, 1.13, 1.23, 1.32, 1.38],
              [0, 0.25, 0.41, 0.55, 0.65, 0.75, 0.80, 0.85, 0.88, 0.90, 0.90],
@@ -14,18 +15,14 @@ beneficio = [[0, 0.28, 0.45, 0.65, 0.78, 0.90, 1.02, 1.13, 1.23, 1.32, 1.38],
 def penalizacion(individual):
     suma = sum(individual)
 
-    if suma > 10:
-        return True
-    else:
-        return False
-
-def penalizar(individual):
-    suma = sum(individual)
+    penalizar       = False
+    penalizarCadena = "no fue penalizado"
 
     if suma > 10:
-        return "fue penalizado"
-    else:
-        return "no fue penalizado"
+        penalizar       = True
+        penalizarCadena = "fue penalizado"
+
+    return penalizar, penalizarCadena
 
 def obtenerResultados(b, inversion):
     return beneficio[b][inversion]
@@ -41,7 +38,7 @@ def aptitudIndividuo(individual):
     dividendo = c1Resultado + c2Resultado + c3Resultado + c4Resultado
     v = abs(dividendo - 10)
     
-    validaPenalizacion = penalizacion(individual)
+    validaPenalizacion, b = penalizacion(individual)
     aptitud = dividendo / (500 * v + 1)
     aptitud = aptitud if not validaPenalizacion else 0
 
@@ -79,13 +76,13 @@ def programa():
     numeroGeneraciones   = int(input("Numero de generaciones: "))
 
     poblacion            = toolbox.population(n=numeroPoblacion)
-    hof                  = tools.HallOfFame(1)
+    hof                  = tools.HallOfFame(numeroGeneraciones)
     stats                = tools.Statistics(lambda ind: ind.fitness.values)
     
     print("Poblacion inicial: ")
-    
     for elemento in poblacion:
-        print("El individuo ", elemento, penalizar(elemento))
+        a, penalizadoCadena = penalizacion(elemento)
+        print("El individuo ", elemento, penalizadoCadena)
     print(" ")
 
     stats.register('avg', np.mean)
@@ -93,11 +90,56 @@ def programa():
     stats.register('min', np.min)
     stats.register('max', np.max)
 
-    algorithms.eaSimple(poblacion, toolbox, cxpb=probabilidadCruza, mutpb=probabilidadMutacion, ngen=numeroGeneraciones, stats=stats, halloffame=hof)
+    algorithms.eaSimple(poblacion, toolbox, cxpb=probabilidadCruza, mutpb=probabilidadMutacion, ngen=numeroGeneraciones-1, stats=stats, halloffame=hof)
+
+    mejorIndividuoGeneracion = []
+    mejorCostoGeneracion     = []
+
+    print("Salon de la fama", hof)
+    for i in hof:
+        mejorIndividuoGeneracion.append(str(i))
+        mejorCostoGeneracion.append(costoIndividuo(i))
+
+    graficar(mejorIndividuoGeneracion, mejorCostoGeneracion, 'Mejores individuos en cada generación')
 
     return poblacion, stats, hof
 
+def graficar(individuos, costos, mensaje):
+
+    print("Mejores individuos", individuos)
+    print("Mejores costos", costos)
+
+    ## Declaramos valores para el eje x
+    eje_x = individuos
+    
+    ## Declaramos valores para el eje y
+    eje_y = costos
+    
+    ## Creamos Gráfica
+    plt.bar(eje_x, eje_y)
+    
+    ## Legenda en el eje y
+    plt.ylabel('Costo')
+    
+    ## Legenda en el eje x
+    plt.xlabel('Individuos')
+    
+    ## Título de Gráfica
+    plt.title(mensaje)
+    
+    ## Mostramos Gráfica
+    plt.show()
 
 if __name__ == "__main__":
-    poblacion, stats, hof = programa()
-    print("El mejor individuo fue ", hof, " y tiene un costo de ", costoIndividuo(hof[0]))
+
+    vecesEjecutar            = int(input("Numero de veces a ejecutar: "))
+    mejorIndividuoEjecuccion = []
+    mejorCostoEjecuccion     = []
+
+    for i in range(vecesEjecutar):
+        poblacion, stats, hof = programa()
+        mejorIndividuoEjecuccion.append(str(hof.items[0]))
+        mejorCostoEjecuccion.append(costoIndividuo(hof.items[0]))
+        print("El mejor individuo fue ", hof.items[0] , " y tiene un costo de ", costoIndividuo(hof.items[0]))
+
+    graficar(mejorIndividuoEjecuccion, mejorCostoEjecuccion, 'Mejores individuos en cada ejecucion')
