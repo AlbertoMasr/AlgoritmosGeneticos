@@ -12,6 +12,32 @@ beneficio = [[0, 0.28, 0.45, 0.65, 0.78, 0.90, 1.02, 1.13, 1.23, 1.32, 1.38],
              [0, 0.15, 0.25, 0.40, 0.50, 0.62, 0.73, 0.82, 0.90, 0.96, 1.00],
              [0, 0.20, 0.33, 0.42, 0.48, 0.53, 0.56, 0.58, 0.60, 0.60, 0.60]]
 
+def graficar(individuos, costos, mensaje):
+
+    print("Mejores individuos", individuos)
+    print("Mejores costos", costos)
+
+    ## Declaramos valores para el eje x
+    eje_x = individuos
+    
+    ## Declaramos valores para el eje y
+    eje_y = costos
+    
+    ## Creamos Gráfica
+    plt.bar(eje_x, eje_y)
+    
+    ## Legenda en el eje y
+    plt.ylabel('Costo')
+    
+    ## Legenda en el eje x
+    plt.xlabel('Individuos')
+    
+    ## Título de Gráfica
+    plt.title(mensaje)
+    
+    ## Mostramos Gráfica
+    plt.show()
+
 def penalizacion(individual):
     suma = sum(individual)
 
@@ -69,7 +95,7 @@ toolbox.register('mate', tools.cxTwoPoint)
 toolbox.register('mutate', tools.mutShuffleIndexes, indpb=0.01)
 toolbox.register('select', tools.selTournament, tournsize=2)
 
-def programa():
+def programa(numeroIteracion):
     numeroPoblacion      = int(input("Numero de individuos para la poblacion: "))
     probabilidadCruza    = float(input("Probabilidad de cruza: "))
     probabilidadMutacion = float(input("Probabilidad de mutacion: "))
@@ -100,35 +126,11 @@ def programa():
         mejorIndividuoGeneracion.append(str(i))
         mejorCostoGeneracion.append(costoIndividuo(i))
 
-    graficar(mejorIndividuoGeneracion, mejorCostoGeneracion, 'Mejores individuos en cada generación')
+    mensajeEnviar = 'Mejores individuos de la generación ejecuccion #'+ str(numeroIteracion)
+
+    graficar(mejorIndividuoGeneracion, mejorCostoGeneracion, mensajeEnviar)
 
     return poblacion, stats, hof
-
-def graficar(individuos, costos, mensaje):
-
-    print("Mejores individuos", individuos)
-    print("Mejores costos", costos)
-
-    ## Declaramos valores para el eje x
-    eje_x = individuos
-    
-    ## Declaramos valores para el eje y
-    eje_y = costos
-    
-    ## Creamos Gráfica
-    plt.bar(eje_x, eje_y)
-    
-    ## Legenda en el eje y
-    plt.ylabel('Costo')
-    
-    ## Legenda en el eje x
-    plt.xlabel('Individuos')
-    
-    ## Título de Gráfica
-    plt.title(mensaje)
-    
-    ## Mostramos Gráfica
-    plt.show()
 
 if __name__ == "__main__":
 
@@ -137,7 +139,7 @@ if __name__ == "__main__":
     mejorCostoEjecuccion     = []
 
     for i in range(vecesEjecutar):
-        poblacion, stats, hof = programa()
+        poblacion, stats, hof = programa( i + 1 )
         mejorIndividuoEjecuccion.append(str(hof.items[0]))
         mejorCostoEjecuccion.append(costoIndividuo(hof.items[0]))
         print("El mejor individuo fue ", hof.items[0] , " y tiene un costo de ", costoIndividuo(hof.items[0]))
